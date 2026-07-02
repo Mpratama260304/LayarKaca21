@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: lk21-mirror-proxy
+    runtime: node
+    plan: free
+    buildCommand: ""
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: ORIGIN_URL
+        value: http://168.144.38.21
+      - key: CANONICAL_HOST
+        sync: false
+      - key: FORCE_HTTPS
+        value: "false"
+      - key: REMOVE_ADS
+        value: "true"
+      - key: KEEP_ANALYTICS
+        value: "false"
+      - key: PLAYER_DOMAINS
+        value: bysetayico.com
