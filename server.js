@@ -45,6 +45,11 @@ const FORCE_HTTPS = envBool(process.env.FORCE_HTTPS, false);
 const REMOVE_ADS = envBool(process.env.REMOVE_ADS, true);
 const KEEP_ANALYTICS = envBool(process.env.KEEP_ANALYTICS, false);
 
+// Rebrand the site name in output (title, og:site_name, JSON-LD, RSS, alt text).
+// Only whole-word matches are replaced, so e.g. "Rebahin21" stays intact.
+const BRAND_FROM = process.env.BRAND_FROM || 'Rebahin';
+const BRAND_TO = process.env.BRAND_TO || 'Layarkaca21';
+
 // Ad / tracker / popunder domains to strip from HTML. The video player domain
 // is intentionally NOT here, so the player keeps working.
 const DEFAULT_AD_DOMAINS = [
@@ -126,6 +131,20 @@ function rewriteHost(body, mirrorBase, mirrorHost) {
     .replace(new RegExp('//' + hostEsc, 'gi'), '//' + mirrorHost)
     // Bare hostname leftovers (meta tags, attributes) -> mirror host
     .replace(new RegExp('(^|[^\\w.])' + hostnameEsc + '(?![\\w.])', 'gi'), '$1' + mirrorHost);
+}
+
+/**
+ * Rebrand the site name (e.g. "Rebahin" -> "Layarkaca21") in text output.
+ * Only whole-word occurrences are replaced so "Rebahin21" (a different mirror
+ * link) is left untouched. Also collapses an accidental "Brand - Brand".
+ */
+function applyBrand(body) {
+  if (!BRAND_FROM || BRAND_FROM === BRAND_TO) return body;
+  const from = escapeRe(BRAND_FROM);
+  const to = escapeRe(BRAND_TO);
+  return body
+    .replace(new RegExp(from + '(?![A-Za-z0-9])', 'g'), BRAND_TO)
+    .replace(new RegExp(to + '(\\s*[-|–»]\\s*)' + to, 'g'), BRAND_TO);
 }
 
 /**
@@ -285,6 +304,7 @@ const server = http.createServer((req, res) => {
       let body = buf.toString('utf8');
 
       body = rewriteHost(body, mirrorBase, mirrorHost);
+      body = applyBrand(body);
       if (/text\/html/i.test(ct)) {
         body = stripAds(body);
       }
@@ -319,6 +339,7 @@ server.listen(PORT, () => {
   console.log(`[mirror] origin        = ${ORIGIN_URL}`);
   console.log(`[mirror] canonicalHost = ${CANONICAL_HOST || '(dynamic from Host header)'}`);
   console.log(`[mirror] forceHttps    = ${FORCE_HTTPS}  removeAds = ${REMOVE_ADS}`);
+  console.log(`[mirror] brand         = ${BRAND_FROM} -> ${BRAND_TO}`);
   console.log(`[mirror] adDomains     = ${AD_DOMAINS.length} entries`);
   console.log(`[mirror] playerSafe    = ${PLAYER_SAFE_DOMAINS.join(', ')}`);
 });

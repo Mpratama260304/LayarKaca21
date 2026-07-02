@@ -46,6 +46,7 @@ See [.env.example](.env.example). Most important:
 | `FORCE_HTTPS` | `false` | Auto-detects `https` from `x-forwarded-proto` (set by Railway/Render). Only force `true` if your host serves https but omits that header |
 | `REMOVE_ADS` | `true` | Strip ad/tracker scripts |
 | `KEEP_ANALYTICS` | `false` | `true` keeps GTM/GA |
+| `BRAND_FROM` / `BRAND_TO` | `Rebahin` / `Layarkaca21` | Rebrands the site name in title/og/JSON-LD (whole-word only) |
 | `EXTRA_AD_DOMAINS` | *(empty)* | Comma-separated extra domains to block |
 | `PLAYER_DOMAINS` | `bysetayico.com` | Never blocked (video player) |
 | `PORT` | `8080` | Set automatically by Railway/Render |
